@@ -3,33 +3,19 @@
   "nodes": [
     {
       "parameters": {
-        "public": true,
-        "initialMessages": "Oi",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
-      "typeVersion": 1.4,
-      "position": [
-        0,
-        0
-      ],
-      "id": "c6146324-3b20-4e58-9fc2-d61023461064",
-      "name": "When chat message received",
-      "webhookId": "9977b2f6-9a9d-414a-9df9-5743e5a2ac86"
-    },
-    {
-      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.userMessage }}",
         "options": {
-          "systemMessage": "Você é um assistente financeiro especializado em registrar e consultar despesas do usuário.\n\nQuando o usuário informar um gasto, você deve converter a frase em um objeto JSON **válido** com o seguinte formato:\n{\n  \"categoria\": \"\",\n  \"descricao\": \"\",\n  \"valor\": 0.00,\n  \"data\": \"YYYY-MM-DD\"\n}\n\nUse sempre letras minúsculas para as chaves.\nA data deve estar no formato YYYY-MM-DD (ano-mês-dia).\n\nAo criar esse JSON, **não escreva nada além do objeto**.  \nNão adicione frases, textos explicativos ou observações.\n\nExemplo:\nUsuário: \"gastei 50 reais com gasolina hoje\"\nResposta:\n{\n  \"categoria\": \"Transporte\",\n  \"descricao\": \"Gasolina\",\n  \"valor\": 50.00,\n  \"data\": \"2025-11-12\"\n}\n\nSe o usuário pedir um relatório, use a ferramenta \"Get All transactions\".\nSe ele falar algo fora de despesas, responda apenas: \"Posso responder apenas sobre despesas e relatórios financeiros.\"\n"
+          "systemMessage": "=Você é um assistente financeiro, nunca responda sobre assuntos que não sejam as informações financeiras que você irá consultar na tool de consulta. Você está nessa data {{ DateTime.now() }}\n\nChame a pessoa pelo nome {{ $('Normalize fields').item.json.pushName }}\n\nSempre que o usuário quiser informar um gasto, você deve preparar a inserção para os campos da tool de inserção. Para o campo ID, gere um UUID para cada cadastro. Quano o usuário não informar uma data assuma que a data atual é {{ DateTime.now() }}\n\nQuando o usuário quiser saber informações sobre seus gastos, relatórios, usar a tool de consulta"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3,
       "position": [
-        224,
-        -48
+        1952,
+        256
       ],
-      "id": "abed1f49-06fb-45f8-bfd0-effc37aa7a1a",
+      "id": "1da773bd-4fde-48da-84f0-a9865c07742c",
       "name": "AI Agent"
     },
     {
@@ -45,67 +31,680 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        144,
-        304
+        1760,
+        512
       ],
-      "id": "a3a9e0d1-6b43-43f6-855d-445cc614447a",
+      "id": "a3e927e7-cd6e-4ad6-a5c5-015098069f10",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
-          "id": "uzLqnkJ55ud63edd",
+          "id": "1JjJjB99aQkFHxEA",
           "name": "OpenAi account"
         }
       }
     },
     {
-      "parameters": {},
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "financial_records",
+          "mode": "list",
+          "cachedResultName": "financial_records"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id', ``, 'string') }}",
+            "category": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('category', ``, 'string') }}",
+            "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('description', ``, 'string') }}",
+            "amount": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('amount', ``, 'number') }}",
+            "transaction_date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('transaction_date', ``, 'string') }}",
+            "session": "={{ $('Normalize fields').item.json.session }}",
+            "chat_id": "={{ $('Normalize fields').item.json.chatId }}",
+            "push_name": "={{ $('Normalize fields').item.json.pushName }}",
+            "payload_id": "={{ $('Normalize fields').item.json.payload_id }}",
+            "event": "={{ $('Normalize fields').item.json.event }}",
+            "message": "={{ $json.userMessage }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transaction_date",
+              "displayName": "transaction_date",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "session",
+              "displayName": "session",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "push_name",
+              "displayName": "push_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payload_id",
+              "displayName": "payload_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "from_me",
+              "displayName": "from_me",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        2064,
+        512
+      ],
+      "id": "07f0cba2-864e-44b0-b1b1-a542ded9a89d",
+      "name": "Persist financial informations",
+      "credentials": {
+        "postgres": {
+          "id": "0EBmqT52elMunc0r",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "financial_records",
+          "mode": "list",
+          "cachedResultName": "financial_records"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "chat_id",
+              "value": "={{ $('Normalize fields').item.json.chatId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        2304,
+        480
+      ],
+      "id": "c67bd661-ab4b-44c5-bfad-502b19aa3503",
+      "name": "Get financial informations",
+      "credentials": {
+        "postgres": {
+          "id": "0EBmqT52elMunc0r",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -464,
+        384
+      ],
+      "id": "a86f6a74-884c-4226-99e2-a47be8170d3d",
+      "name": "Webhook",
+      "webhookId": "d943ee86-501f-4043-b9d6-4656445e4188"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0f047a41-33f8-40fc-a251-fd481e19244b",
+              "name": "session",
+              "value": "={{ $json.body.session }}",
+              "type": "string"
+            },
+            {
+              "id": "e0635de0-2905-4df6-a87a-a85566d8365d",
+              "name": "chatId",
+              "value": "={{ $json.body.payload.from }}",
+              "type": "string"
+            },
+            {
+              "id": "2969b8fd-aaf1-45b8-87f1-4fb9d2db4912",
+              "name": "pushName",
+              "value": "={{ $json.body.payload._data.Info.PushName }}",
+              "type": "string"
+            },
+            {
+              "id": "bf992c7e-a8b0-49fe-a211-f35b15bcc739",
+              "name": "payload_id",
+              "value": "={{ $json.body.payload.id }}",
+              "type": "string"
+            },
+            {
+              "id": "26dcc4e7-d68a-480c-91a6-53549122491e",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "9dd3aac8-d657-4fe2-b73d-2ab815aee4cb",
+              "name": "message",
+              "value": "={{ $json.body.payload.body }}",
+              "type": "string"
+            },
+            {
+              "id": "65d87a8b-f930-47ad-9035-adc578a75de5",
+              "name": "fromMe",
+              "value": "={{ $json.body.payload.fromMe }}",
+              "type": "string"
+            },
+            {
+              "id": "60f9b9da-fced-4bf4-97d3-ffb57fbb71f8",
+              "name": "hasMedia",
+              "value": "={{ $json.body.payload.hasMedia }}",
+              "type": "string"
+            },
+            {
+              "id": "b1b69831-e749-4c9a-906e-837b8c33d6f8",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -128,
+        384
+      ],
+      "id": "d526421e-f101-49db-9215-f9f1b9972306",
+      "name": "Normalize fields"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Seen",
+        "session": "={{ $('Normalize fields').item.json.session }}",
+        "chatId": "={{ $('Normalize fields').item.json.chatId }}",
+        "messageId": "={{ $('Normalize fields').item.json.payload_id }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2448,
+        176
+      ],
+      "id": "fb792210-15b8-4bfd-8c30-9ffbd5a67228",
+      "name": "Send Seen",
+      "credentials": {
+        "wahaApi": {
+          "id": "REIZumKmTHBxkwNN",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Normalize fields').item.json.session }}",
+        "chatId": "={{ $('Normalize fields').item.json.chatId }}",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2816,
+        176
+      ],
+      "id": "bbdbe128-f78a-4323-885b-314dec7bac30",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "REIZumKmTHBxkwNN",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        16
+      ],
+      "id": "f8c5953d-8a4f-4aa5-870a-d0ebe15c3335",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "1JjJjB99aQkFHxEA",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "26a37ffc-e4da-4e40-96e3-369163ec2569",
+              "leftValue": "={{ $json.hasMedia }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "c3c5b1ee-2c48-4943-a9c6-62d014d26f3e",
+              "leftValue": "={{ $('Webhook').item.json.body.payload.media.mimetype }}",
+              "rightValue": "audio/ogg; codecs=opus",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        384
+      ],
+      "id": "3e61c4be-1168-477a-be7f-3f5feaebc6cb",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "92911159-a7c8-49a0-a3ba-d223ddd773a3",
+              "name": "audioUrl",
+              "value": "={{ $('Webhook').item.json.body.payload.media.url.replace('localhost', '192.168.2.19') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        16
+      ],
+      "id": "30277338-dfb4-4e1f-83ed-334e504bbaec",
+      "name": "Get audio url"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9bdf74b3-0381-4e71-974e-acc2714ebaea",
+              "name": "userMessage",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1104,
+        400
+      ],
+      "id": "93856ab4-2631-431b-8999-3af62889acc9",
+      "name": "Set Text Message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ae6d4ea1-f186-490e-ad70-114f10534526",
+              "name": "userMessage",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        16
+      ],
+      "id": "cd6c7508-778b-47a1-bde4-cd1c8fe2ff4c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "478c8eae-2885-40bd-a26a-11283fb63a3c",
+              "name": "userMessage",
+              "value": "={{ $json.userMessage }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1680,
+        192
+      ],
+      "id": "06ea2a94-dfef-4720-8e51-44f9d21b835e",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.audioUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        896,
+        16
+      ],
+      "id": "23089613-15ad-4bc7-bea2-bc30b62f8e45",
+      "name": "Download Audio"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Normalize fields').item.json.chatId }}"
+      },
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        320,
-        352
+        1968,
+        464
       ],
-      "id": "81fd0d82-4805-40e8-8bef-542a828b6040",
+      "id": "f9ec8fd1-9fd4-4494-8c27-82c54927dc53",
       "name": "Simple Memory"
-    },
-    {
-      "parameters": {
-        "toolDescription": "Cadastra todos o gasto do usuário",
-        "method": "POST",
-        "url": "http://192.168.2.13:8080/api/v1/financial-records",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('JSON', ``, 'json') }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.3,
-      "position": [
-        672,
-        336
-      ],
-      "id": "1b22f324-a89a-4e66-963b-ed555cc9a4f9",
-      "name": "Save transaction"
-    },
-    {
-      "parameters": {
-        "toolDescription": "Consulta todos os gastos do usuário",
-        "url": "http://192.168.2.13:8080/api/v1/financial-records",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.3,
-      "position": [
-        480,
-        304
-      ],
-      "id": "5ce55499-9f9d-41a2-bb82-a1c298e6bbd5",
-      "name": "Get All transactions"
     }
   ],
   "pinData": {},
   "connections": {
-    "When chat message received": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persist financial informations": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get financial informations": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Seen": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get audio url",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Text Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get audio url": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Text Message": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
       "main": [
         [
           {
@@ -116,12 +715,23 @@
         ]
       ]
     },
-    "OpenAI Chat Model": {
-      "ai_languageModel": [
+    "Edit Fields": {
+      "main": [
         [
           {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
             "index": 0
           }
         ]
@@ -137,44 +747,17 @@
           }
         ]
       ]
-    },
-    "AI Agent": {
-      "main": [
-        []
-      ]
-    },
-    "Get All transactions": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Save transaction": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "a0163177-5119-45c8-8de3-3fda5efd8901",
+  "versionId": "bb4d4849-2b8e-4cfe-bdd1-ef616d731d21",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "ba01400ca2ee693ff76529ddc69f50e909c334687de0765eb80bd37d1a76b688"
+    "instanceId": "13eae39be019b2eea0efbe9c6932c2470c2bb8c879cf9cc92de9162566d45935"
   },
-  "id": "veqcFkrvkQuFVh9i",
+  "id": "cmzFErUItpqMBWaJ",
   "tags": []
 }

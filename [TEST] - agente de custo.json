@@ -12,8 +12,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3,
       "position": [
-        1952,
-        256
+        2016,
+        64
       ],
       "id": "1da773bd-4fde-48da-84f0-a9865c07742c",
       "name": "AI Agent"
@@ -31,8 +31,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        1760,
-        512
+        1824,
+        368
       ],
       "id": "a3e927e7-cd6e-4ad6-a5c5-015098069f10",
       "name": "OpenAI Chat Model",
@@ -200,8 +200,8 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.6,
       "position": [
-        2064,
-        512
+        2192,
+        496
       ],
       "id": "07f0cba2-864e-44b0-b1b1-a542ded9a89d",
       "name": "Persist financial informations",
@@ -240,8 +240,8 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.6,
       "position": [
-        2304,
-        480
+        2464,
+        464
       ],
       "id": "c67bd661-ab4b-44c5-bfad-502b19aa3503",
       "name": "Get financial informations",
@@ -261,8 +261,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -464,
-        384
+        -400,
+        192
       ],
       "id": "a86f6a74-884c-4226-99e2-a47be8170d3d",
       "name": "Webhook",
@@ -333,8 +333,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -128,
-        384
+        -64,
+        192
       ],
       "id": "d526421e-f101-49db-9215-f9f1b9972306",
       "name": "Normalize fields"
@@ -351,8 +351,8 @@
       "type": "@devlikeapro/n8n-nodes-waha.WAHA",
       "typeVersion": 202502,
       "position": [
-        2448,
-        176
+        2512,
+        -16
       ],
       "id": "fb792210-15b8-4bfd-8c30-9ffbd5a67228",
       "name": "Send Seen",
@@ -375,8 +375,8 @@
       "type": "@devlikeapro/n8n-nodes-waha.WAHA",
       "typeVersion": 202502,
       "position": [
-        2816,
-        176
+        2880,
+        -16
       ],
       "id": "bbdbe128-f78a-4323-885b-314dec7bac30",
       "name": "Send a text message",
@@ -397,8 +397,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 2,
       "position": [
-        1120,
-        16
+        1184,
+        -176
       ],
       "id": "f8c5953d-8a4f-4aa5-870a-d0ebe15c3335",
       "name": "Transcribe a recording",
@@ -447,8 +447,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        256,
-        384
+        320,
+        192
       ],
       "id": "3e61c4be-1168-477a-be7f-3f5feaebc6cb",
       "name": "If"
@@ -470,8 +470,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        688,
-        16
+        752,
+        -176
       ],
       "id": "30277338-dfb4-4e1f-83ed-334e504bbaec",
       "name": "Get audio url"
@@ -493,8 +493,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1104,
-        400
+        1168,
+        208
       ],
       "id": "93856ab4-2631-431b-8999-3af62889acc9",
       "name": "Set Text Message"
@@ -516,8 +516,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1376,
-        16
+        1440,
+        -176
       ],
       "id": "cd6c7508-778b-47a1-bde4-cd1c8fe2ff4c",
       "name": "Edit Fields"
@@ -539,8 +539,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1680,
-        192
+        1744,
+        0
       ],
       "id": "06ea2a94-dfef-4720-8e51-44f9d21b835e",
       "name": "Edit Fields1"
@@ -553,8 +553,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        896,
-        16
+        960,
+        -176
       ],
       "id": "23089613-15ad-4bc7-bea2-bc30b62f8e45",
       "name": "Download Audio"
@@ -567,8 +567,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        1968,
-        464
+        1984,
+        496
       ],
       "id": "f9ec8fd1-9fd4-4494-8c27-82c54927dc53",
       "name": "Simple Memory"
@@ -749,11 +749,11 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "4fbd7902-e2d1-49bf-8f42-d2f8698df250",
+  "versionId": "d8983116-08db-420a-9462-af2535e50cce",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "13eae39be019b2eea0efbe9c6932c2470c2bb8c879cf9cc92de9162566d45935"

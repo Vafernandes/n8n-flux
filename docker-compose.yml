@@ -1,19 +1,19 @@
 services:
 
-  # postgres:
-  #   image: postgres:16-alpine
-  #   container_name: financial-records-postgres
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - POSTGRES_DB=financial_records
-  #     - POSTGRES_USER=financial_user
-  #     - POSTGRES_PASSWORD=financial_password
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres-data:/var/lib/postgresql/data
+  postgres:
+    image: postgres:16-alpine
+    container_name: financial-records-postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=financial_records
+      - POSTGRES_USER=financial_user
+      - POSTGRES_PASSWORD=financial_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   waha:
     image: devlikeapro/waha:latest

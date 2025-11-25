@@ -4,7 +4,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.userMessage }}",
+        "text": "={{ $('Normalize Message').item.json.userMessage }}",
         "options": {
           "systemMessage": "=Você é um assistente financeiro, nunca responda sobre assuntos que não sejam as informações financeiras que você irá consultar na tool de consulta. Você está nessa data {{ DateTime.now() }}\n\nChame a pessoa pelo nome {{ $('Normalize fields').item.json.pushName }}\n\nSempre que o usuário quiser informar um gasto, você deve preparar a inserção para os campos da tool de inserção. Para o campo ID, gere um UUID para cada cadastro. Quano o usuário não informar uma data assuma que a data atual é {{ DateTime.now() }}\n\nQuando o usuário quiser saber informações sobre seus gastos, relatórios, usar a tool de consulta"
         }
@@ -12,8 +12,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3,
       "position": [
-        2016,
-        64
+        2544,
+        144
       ],
       "id": "1da773bd-4fde-48da-84f0-a9865c07742c",
       "name": "AI Agent"
@@ -31,8 +31,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        1824,
-        368
+        2320,
+        320
       ],
       "id": "a3e927e7-cd6e-4ad6-a5c5-015098069f10",
       "name": "OpenAI Chat Model",
@@ -200,8 +200,8 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.6,
       "position": [
-        2192,
-        496
+        2704,
+        448
       ],
       "id": "07f0cba2-864e-44b0-b1b1-a542ded9a89d",
       "name": "Persist financial informations",
@@ -240,8 +240,8 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.6,
       "position": [
-        2464,
-        464
+        2944,
+        416
       ],
       "id": "c67bd661-ab4b-44c5-bfad-502b19aa3503",
       "name": "Get financial informations",
@@ -261,8 +261,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -400,
-        192
+        -816,
+        176
       ],
       "id": "a86f6a74-884c-4226-99e2-a47be8170d3d",
       "name": "Webhook",
@@ -275,49 +275,49 @@
             {
               "id": "0f047a41-33f8-40fc-a251-fd481e19244b",
               "name": "session",
-              "value": "={{ $json.body.session }}",
+              "value": "={{ $('Webhook').item.json.body.session }}",
               "type": "string"
             },
             {
               "id": "e0635de0-2905-4df6-a87a-a85566d8365d",
               "name": "chatId",
-              "value": "={{ $json.body.payload.from }}",
+              "value": "={{ $('Webhook').item.json.body.payload.from }}",
               "type": "string"
             },
             {
               "id": "2969b8fd-aaf1-45b8-87f1-4fb9d2db4912",
               "name": "pushName",
-              "value": "={{ $json.body.payload._data.Info.PushName }}",
+              "value": "={{ $('Webhook').item.json.body.payload._data.Info.PushName }}",
               "type": "string"
             },
             {
               "id": "bf992c7e-a8b0-49fe-a211-f35b15bcc739",
               "name": "payload_id",
-              "value": "={{ $json.body.payload.id }}",
+              "value": "={{ $('Webhook').item.json.body.payload.id }}",
               "type": "string"
             },
             {
               "id": "26dcc4e7-d68a-480c-91a6-53549122491e",
               "name": "event",
-              "value": "={{ $json.body.event }}",
+              "value": "={{ $('Webhook').item.json.body.event }}",
               "type": "string"
             },
             {
               "id": "9dd3aac8-d657-4fe2-b73d-2ab815aee4cb",
               "name": "message",
-              "value": "={{ $json.body.payload.body }}",
+              "value": "={{ $('Webhook').item.json.body.payload.body }}",
               "type": "string"
             },
             {
               "id": "65d87a8b-f930-47ad-9035-adc578a75de5",
               "name": "fromMe",
-              "value": "={{ $json.body.payload.fromMe }}",
+              "value": "={{ $('Webhook').item.json.body.payload.fromMe }}",
               "type": "string"
             },
             {
               "id": "60f9b9da-fced-4bf4-97d3-ffb57fbb71f8",
               "name": "hasMedia",
-              "value": "={{ $json.body.payload.hasMedia }}",
+              "value": "={{ $('Webhook').item.json.body.payload.hasMedia }}",
               "type": "string"
             },
             {
@@ -333,8 +333,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -64,
-        192
+        -512,
+        176
       ],
       "id": "d526421e-f101-49db-9215-f9f1b9972306",
       "name": "Normalize fields"
@@ -351,8 +351,8 @@
       "type": "@devlikeapro/n8n-nodes-waha.WAHA",
       "typeVersion": 202502,
       "position": [
-        2512,
-        -16
+        1696,
+        48
       ],
       "id": "fb792210-15b8-4bfd-8c30-9ffbd5a67228",
       "name": "Send Seen",
@@ -375,7 +375,7 @@
       "type": "@devlikeapro/n8n-nodes-waha.WAHA",
       "typeVersion": 202502,
       "position": [
-        2880,
+        3200,
         -16
       ],
       "id": "bbdbe128-f78a-4323-885b-314dec7bac30",
@@ -397,8 +397,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 2,
       "position": [
-        1184,
-        -176
+        736,
+        -192
       ],
       "id": "f8c5953d-8a4f-4aa5-870a-d0ebe15c3335",
       "name": "Transcribe a recording",
@@ -447,8 +447,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        320,
-        192
+        -144,
+        176
       ],
       "id": "3e61c4be-1168-477a-be7f-3f5feaebc6cb",
       "name": "If"
@@ -460,7 +460,7 @@
             {
               "id": "92911159-a7c8-49a0-a3ba-d223ddd773a3",
               "name": "audioUrl",
-              "value": "={{ $('Webhook').item.json.body.payload.media.url.replace('localhost', '192.168.2.14') }}",
+              "value": "={{ $('Webhook').item.json.body.payload.media.url.replace('localhost', '192.168.2.11') }}",
               "type": "string"
             }
           ]
@@ -470,8 +470,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        752,
-        -176
+        304,
+        -192
       ],
       "id": "30277338-dfb4-4e1f-83ed-334e504bbaec",
       "name": "Get audio url"
@@ -493,8 +493,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1168,
-        208
+        720,
+        192
       ],
       "id": "93856ab4-2631-431b-8999-3af62889acc9",
       "name": "Set Text Message"
@@ -516,11 +516,85 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1440,
-        -176
+        992,
+        -192
       ],
       "id": "cd6c7508-778b-47a1-bde4-cd1c8fe2ff4c",
       "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.audioUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        512,
+        -192
+      ],
+      "id": "23089613-15ad-4bc7-bea2-bc30b62f8e45",
+      "name": "Download Audio"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Normalize fields').item.json.chatId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        2480,
+        448
+      ],
+      "id": "f9ec8fd1-9fd4-4494-8c27-82c54927dc53",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Start Typing",
+        "session": "={{ $('Normalize fields').item.json.session }}",
+        "chatId": "={{ $('Normalize fields').item.json.chatId }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2048,
+        48
+      ],
+      "id": "8a88f0b1-8783-47c7-b6a0-0ca325bbdeb1",
+      "name": "Start Typing",
+      "credentials": {
+        "wahaApi": {
+          "id": "REIZumKmTHBxkwNN",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Stop Typing",
+        "session": "={{ $('Webhook').item.json.body.session }}",
+        "chatId": "={{ $('Webhook').item.json.body.payload.from }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        3520,
+        -16
+      ],
+      "id": "1e30f206-715a-4b99-9ca7-d9a25a81cb95",
+      "name": "Stop Typing",
+      "credentials": {
+        "wahaApi": {
+          "id": "REIZumKmTHBxkwNN",
+          "name": "WAHA account"
+        }
+      }
     },
     {
       "parameters": {
@@ -539,39 +613,11 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1744,
-        0
+        1296,
+        -16
       ],
       "id": "06ea2a94-dfef-4720-8e51-44f9d21b835e",
-      "name": "Edit Fields1"
-    },
-    {
-      "parameters": {
-        "url": "={{ $json.audioUrl }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [
-        960,
-        -176
-      ],
-      "id": "23089613-15ad-4bc7-bea2-bc30b62f8e45",
-      "name": "Download Audio"
-    },
-    {
-      "parameters": {
-        "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Normalize fields').item.json.chatId }}"
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.3,
-      "position": [
-        1984,
-        496
-      ],
-      "id": "f9ec8fd1-9fd4-4494-8c27-82c54927dc53",
-      "name": "Simple Memory"
+      "name": "Normalize Message"
     }
   ],
   "pinData": {},
@@ -635,7 +681,7 @@
       "main": [
         [
           {
-            "node": "Send Seen",
+            "node": "Send a text message",
             "type": "main",
             "index": 0
           }
@@ -646,7 +692,7 @@
       "main": [
         [
           {
-            "node": "Send a text message",
+            "node": "Start Typing",
             "type": "main",
             "index": 0
           }
@@ -697,18 +743,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields1": {
-      "main": [
-        [
-          {
-            "node": "AI Agent",
+            "node": "Normalize Message",
             "type": "main",
             "index": 0
           }
@@ -719,7 +754,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields1",
+            "node": "Normalize Message",
             "type": "main",
             "index": 0
           }
@@ -747,13 +782,51 @@
           }
         ]
       ]
+    },
+    "Start Typing": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop Typing": {
+      "main": [
+        []
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Stop Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Message": {
+      "main": [
+        [
+          {
+            "node": "Send Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "d8983116-08db-420a-9462-af2535e50cce",
+  "versionId": "3bea4ba8-b097-496f-95dd-c70a1e664cff",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "13eae39be019b2eea0efbe9c6932c2470c2bb8c879cf9cc92de9162566d45935"

@@ -15,30 +15,30 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-  waha:
-    image: devlikeapro/waha:latest
-    container_name: financial-waha
-    platform: linux/amd64
-    environment:
-      WHATSAPP_HOOK_URL: http://host.docker.internal:5678/webhook/webhook
-      WHATSAPP_DEFAULT_ENGINE: GOWS
-      WHATSAPP_HOOK_EVENTS: message
-      WAHA_NO_API_KEY: true
-      WAHA_DASHBOARD_NO_PASSWORD: true
-      WHATSAPP_SWAGGER_NO_PASSWORD: true
+  # waha:
+  #   image: devlikeapro/waha:latest
+  #   container_name: financial-waha
+  #   platform: linux/amd64
+  #   environment:
+  #     WHATSAPP_HOOK_URL: http://host.docker.internal:5678/webhook/webhook
+  #     WHATSAPP_DEFAULT_ENGINE: GOWS
+  #     WHATSAPP_HOOK_EVENTS: message
+  #     WAHA_NO_API_KEY: true
+  #     WAHA_DASHBOARD_NO_PASSWORD: true
+  #     WHATSAPP_SWAGGER_NO_PASSWORD: true
 
-    volumes:
-      - waha_sessions:/app/.sessions
-      - waha_media:/app/.media
-    ports:
-      - "3000:3000"
+  #   volumes:
+  #     - waha_sessions:/app/.sessions
+  #     - waha_media:/app/.media
+  #   ports:
+  #     - "3000:3000"
 
   n8n:
     image: n8nio/n8n:latest
     container_name: financial-n8n
     platform: linux/amd64
     environment:
-      WEBHOOK_URL: http://host.docker.internal:5678
+      WEBHOOK_URL: https://e0b286fbcd0c.ngrok-free.app # Cole aqui a URL do ngrok na porta 5678
       N8N_HOST: host.docker.internal
       GENERIC_TIMEZONE: America/Sao_Paulo
       N8N_LOG_LEVEL: debug

@@ -1,0 +1,585 @@
+{
+  "name": "[TEST] - agente de custo",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Normalize Message').item.json.userMessage }}",
+        "options": {
+          "systemMessage": "=🧠 Prompt de Registro e Categorização de Notas\n(n8n + MongoDB | MODELO PROFISSIONAL)\n🎯 Identidade do Agente\n\nVocê é um Assistente Inteligente de Registro de Notas.\n\nSua função exclusiva é:\n\nIdentificar a intenção da mensagem do usuário\n\nClassificar corretamente o conteúdo\n\nCategorizar por tags padronizadas\n\nRegistrar a nota no MongoDB\n\nPermitir consulta e exclusão de notas existentes\n\n🚫 Você não conversa livremente\n🚫 Você não responde assuntos fora das notas\n🚫 Você não explica decisões\n\n🧭 Contexto do Sistema\n\nData e hora atual: {{ DateTime.now() }}\n\nNome do usuário: {{ $('Normalize fields').item.json.pushName }}\n\nIdentificador do usuário (telefone normalizado): {{ $('Normalize fields').item.json.chatId }}\n\nCanal da mensagem: whatsapp\n\n🛑 Regras Absolutas (Obrigatórias)\n\nNunca invente informações\n\nNunca responda fora do contexto de notas\n\nNunca gere respostas longas ou ambíguas\n\nNunca use tags fora do sistema padronizado\n\nNunca responda antes de executar uma tool\n\nNunca retorne JSON, IDs ou códigos ao usuário\n\nSempre gere um UUID v4 para novas notas\n\nNunca gere novo UUID em atualizações\n\nQuando não houver data explícita, use {{ DateTime.now() }}\n\n🔐 Regra de Conteúdo Sensível (LGPD)\n\nAntes de qualquer ação, analise a mensagem.\n\n🚨 Se o conteúdo for sensível\n\n(ex.: CPF, RG, cartão, senha, dados médicos, informações pessoais críticas):\n\n❌ NÃO execute nenhuma tool\n\n✅ Responda imediatamente e somente com:\n\n⚠️🚨 Conteúdo sensível não será armazenado!\nCuidado para não expor suas informações pessoais ⚠️🚨\n\n\nNenhuma outra ação deve ser realizada.\n\n🔧 REGRA PRINCIPAL — USO DE TOOLS\n\nQuando a mensagem não for sensível e tiver intenção de registro:\n\n✅ Você DEVE obrigatoriamente executar a tool\n[Insert documents in MongoDB]\n\n🚫 É proibido:\n\nPerguntar se deve registrar\n\nResponder texto antes da tool\n\nExecutar múltiplas tools\n\nA resposta ao usuário SÓ PODE acontecer após a tool.\n\n📦 Formato OBRIGATÓRIO da Tool\n[Insert documents in MongoDB]\n\nAo chamar a tool **[Insert documents in MongoDB]**, envie **EXATAMENTE** este formato:\n\n```json\n{\n  \"id\": \"<uuid>\",\n\n  \"userId\": \"{{ $('Normalize fields').item.json.chatId }}\",\n\n  \"type\": \"text | reminder | link | image | audio\",\n\n  \"content\": {\n    \"text\": \"string | null\",\n    \"caption\": \"string | null\"\n  },\n\n  \"metadata\": {\n    \"remindAt\": \"ISO_DATE | null\",\n    \"url\": \"string | null\",\n    \"imageUrl\": \"string | null\",\n    \"audioUrl\": \"string | null\",\n    \"duration\": \"number | null\",\n    \"confidence\": \"number | null\",\n    \"tags\": []\n  },\n\n  \"status\": \"active\",\n\n  \"source\": {\n    \"channel\": \"whatsapp\",\n    \"messageId\": \"{{ $('Normalize fields').item.json.messageId }}\"\n  },\n\n  \"createdAt\": \"{{ DateTime.now() }}\",\n  \"updatedAt\": \"{{ DateTime.now() }}\"\n}\n```\n\n⚠️ Regras do JSON\n\nid: UUID v4 obrigatório\n\ntype: obrigatório e válido\n\ntags: SEMPRE array (1 a 3 itens)\n\nCampos não usados devem ser null\n\nNunca adicionar campos extras\n\nNunca alterar nomes ou estrutura\n\n📝 Processo de Classificação da Nota\n\nAnalise semanticamente a mensagem\n\nIdentifique o tipo da nota:\n\ntext → texto simples\n\nreminder → lembrete com data\n\nlink → URL explícita\n\nimage → imagem\n\naudio → áudio/transcrição\n\nExtraia o conteúdo para content\n\nPreencha metadata quando aplicável\n\nEscolha 1 a 3 tags\n\nExecute a tool de inserção\n\n🗂️ Sistema Padronizado de Tags (USO EXCLUSIVO)\n\nUse somente as tags abaixo:\n\neducacao, ciencia, tecnologia, historia, filosofia, psicologia, matematica, fisica, quimica, biologia, computacao, programacao, bancos-de-dados, redes, seguranca, inteligencia-artificial, machine-learning, dados, estatistica, engenharia, arquitetura, design, ux-ui, artes, musica, cinema, literatura, fotografia, jogos, entretenimento, esportes, saude, bem-estar, nutricao, fitness, medicina, psicologia-clinica, educacao-financeira, financas, economia, investimentos, negocios, empreendedorismo, marketing, vendas, publicidade, comunicacao, jornalismo, midias-sociais, sociedade, politica, direito, legislacao, etica, cultura, antropologia, sociologia, religiao, espiritualidade, meio-ambiente, sustentabilidade, clima, energia, urbanismo, transporte, turismo, geografia, agricultura, alimentos, gastronomia, educacao-online, ensino, aprendizado, carreira, trabalho, produtividade, gestao, lideranca, recursos-humanos, organizacao, planejamento, inovacao, startups, projetos, metodologias-ageis, qualidade, processos, logistica, comercio, e-commerce, atendimento-ao-cliente, experiencia-do-usuario, acessibilidade, inclusao, diversidade, atualidades, noticias, opiniao, tutoriais, referencias, web, link\n\n🗣️ Resposta ao Usuário (ÚNICA PERMITIDA)\n\nApós a execução bem-sucedida da tool, responda exclusivamente com:\n\nNota registrada com sucesso.\n\n\nNada além disso.\n\n🏁 Encerramento\n\nVocê não é um chatbot comum.\nVocê é um agente determinístico de registro de notas.\n\nQualquer comportamento fora dessas regras é considerado incorreto."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1600,
+        320
+      ],
+      "id": "1cd09ac5-82f3-4505-83d4-2468babc8962",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1264,
+        512
+      ],
+      "id": "91b6212e-7c2f-4f6f-aeeb-d310bbd7fcbc",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "1JjJjB99aQkFHxEA",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "zapi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1120,
+        368
+      ],
+      "id": "7b9a4041-d8d2-43dd-99d7-edf35d62754b",
+      "name": "Webhook",
+      "webhookId": "d943ee86-501f-4043-b9d6-4656445e4188"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0635de0-2905-4df6-a87a-a85566d8365d",
+              "name": "chatId",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "2969b8fd-aaf1-45b8-87f1-4fb9d2db4912",
+              "name": "pushName",
+              "value": "={{ $json.body.senderName }}",
+              "type": "string"
+            },
+            {
+              "id": "9dd3aac8-d657-4fe2-b73d-2ab815aee4cb",
+              "name": "message",
+              "value": "={{ $json.body.text.message }}",
+              "type": "string"
+            },
+            {
+              "id": "65d87a8b-f930-47ad-9035-adc578a75de5",
+              "name": "fromMe",
+              "value": "={{ $json.body.fromMe }}",
+              "type": "string"
+            },
+            {
+              "id": "60f9b9da-fced-4bf4-97d3-ffb57fbb71f8",
+              "name": "audio",
+              "value": "={{ $json.body.audio.audioUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "7e77e489-6cae-47c2-bee3-9f5dbcd0a1e4",
+              "name": "messageId",
+              "value": "={{ $json.body.messageId }}",
+              "type": "string"
+            },
+            {
+              "id": "4eea268e-7246-4b0d-8402-896715fde4a0",
+              "name": "",
+              "value": "={{ $json.body.chatLid }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -816,
+        368
+      ],
+      "id": "64db3adc-fbb3-424d-b54c-337238196e09",
+      "name": "Normalize fields"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        432,
+        0
+      ],
+      "id": "b34106e2-bb91-458a-9004-592160f73a65",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "1JjJjB99aQkFHxEA",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "26a37ffc-e4da-4e40-96e3-369163ec2569",
+              "leftValue": "={{ $json.audio }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c3c5b1ee-2c48-4943-a9c6-62d014d26f3e",
+              "leftValue": "={{ $('Webhook').item.json.body.audio.mimeType }}",
+              "rightValue": "audio/ogg; codecs=opus",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        368
+      ],
+      "id": "7f076aa3-f22c-45bc-9188-86e143806975",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "92911159-a7c8-49a0-a3ba-d223ddd773a3",
+              "name": "audioUrl",
+              "value": "={{ $json.audio }}",
+              "type": "string"
+            },
+            {
+              "id": "c9f59776-0166-44d6-9418-92e8e688bb09",
+              "name": "chatId",
+              "value": "={{ $('Normalize fields').item.json.chatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ac98ef3f-1e4a-4818-bc26-0b109766f458",
+      "name": "Get audio url"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9bdf74b3-0381-4e71-974e-acc2714ebaea",
+              "name": "userMessage",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        400
+      ],
+      "id": "28003476-008e-4e1b-b3d0-1a2371f62b71",
+      "name": "Set Text Message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ae6d4ea1-f186-490e-ad70-114f10534526",
+              "name": "userMessage",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "b79ea50a-b18e-4dd4-9150-912d059337cd",
+              "name": "chatId",
+              "value": "={{ $('Normalize fields').item.json.chatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        0
+      ],
+      "id": "abbebe22-72b7-4e8b-ba99-3540ae467ca9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.audioUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "353d42d2-2a66-49b9-ac84-2f62040c32cc",
+      "name": "Download Audio"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Normalize fields').item.json.chatId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1456,
+        640
+      ],
+      "id": "2ff2c70c-7d55-4d6c-b7c0-cfbba55a3b62",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "478c8eae-2885-40bd-a26a-11283fb63a3c",
+              "name": "userMessage",
+              "value": "={{ $json.userMessage }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        176
+      ],
+      "id": "86a36d44-0782-4639-832c-937cf4c69a8d",
+      "name": "Normalize Message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3EAC63B5C99F10D590C4D2F0F8AD607A/token/47BF12CFF233011F3871A81C/send-text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "client-token",
+              "value": "Fdf8c14c39e60421bb6a6e440f9e5a3e3S"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Normalize fields').item.json.chatId }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('AI Agent').item.json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2560,
+        304
+      ],
+      "id": "425e4647-96fb-4cc4-8b4e-ddb70099241e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3EAC63B5C99F10D590C4D2F0F8AD607A/token/47BF12CFF233011F3871A81C/read-message",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "client-token",
+              "value": "Fdf8c14c39e60421bb6a6e440f9e5a3e3S"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Normalize fields').item.json.chatId }}"
+            },
+            {
+              "name": "messageId",
+              "value": "={{ $('Normalize fields').item.json.messageId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2224,
+        304
+      ],
+      "id": "f45f42d0-cd39-4f75-8452-9990af65f0af",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "notes",
+        "fields": "=userMessage, id, userId, type, content, metadata, status, source, createdAt, updatedAt, toolCallId",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.2,
+      "position": [
+        1744,
+        688
+      ],
+      "id": "a04118cb-f7f2-419c-a890-96c5a49c3d41",
+      "name": "Insert documents in MongoDB",
+      "credentials": {
+        "mongoDb": {
+          "id": "WRjKuTZzLxnwKejK",
+          "name": "MongoDB account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get audio url",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Text Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get audio url": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Text Message": {
+      "main": [
+        [
+          {
+            "node": "Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        []
+      ]
+    },
+    "Normalize Message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert documents in MongoDB": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2b1a4dd7-f2e6-4636-8e98-04960f8800d7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "13eae39be019b2eea0efbe9c6932c2470c2bb8c879cf9cc92de9162566d45935"
+  },
+  "id": "zARJ1HFsLUBNdA3e",
+  "tags": []
+}

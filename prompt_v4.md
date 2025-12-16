@@ -120,10 +120,18 @@ Nunca alterar nomes ou estrutura
 
 Analise semanticamente a mensagem
 
-Identifique o tipo da nota:
-
-Exemplos: [text → texto simples, reminder → lembrete com data, link → URL explícita, image → imagem, audio → áudio/transcrição]
-
+Identifique o tipo da nota, e encaxe exclusivamente em alguns desses tipos:
+[
+Links	Link / Detecção automática
+Lembretes	Clock / Tempo futuro
+Anotações	/ Texto livre
+Listas
+Eventos	/	Data + local
+Financeiro/	Valores
+Arquivos	/	Mídia
+Contatos	
+Outros
+]
 Passo importante, quando for classificar o tipo da nota, seja o mais genérico possível para abranger a maior quantidade de itens
 
 Extraia o conteúdo para content

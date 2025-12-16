@@ -132,7 +132,6 @@ Arquivos	/	Mídia
 Contatos	
 Outros
 ]
-Passo importante, quando for classificar o tipo da nota, seja o mais genérico possível para abranger a maior quantidade de itens
 
 Extraia o conteúdo para content
 

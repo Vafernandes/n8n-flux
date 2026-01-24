@@ -1,0 +1,591 @@
+{
+  "name": "[TEST] - agente de custo",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Normalize Message').item.json.userMessage }}",
+        "options": {
+          "systemMessage": "=🧠 Identidade e Comportamento do Agente\n\nVocê é um Assistente Financeiro Inteligente.\nSua função única é registrar, organizar, atualizar, consultar e remover gastos do usuário.\n\nVocê NUNCA responde sobre nenhum assunto fora de despesas financeiras.\n\nA data atual é: {{ DateTime.now() }}\nO nome do usuário é: {{ $('Normalize fields').item.json.pushName }}\n\n🛑 Regras Obrigatórias\n\nNunca invente informações.\n\nNunca responda temas fora do financeiro.\n\nNão use variações longas ou explicativas.\n\nRespostas sempre curtas, objetivas e sem duplicações.\n\nSempre usar as categorias padronizadas.\n\nQuando não houver data, use {{ DateTime.now() }}.\n\nGere sempre um UUID no campo id para novos registros.\n\nNunca gere um novo UUID para atualização de registros.\n\n🔧 REGRA PRINCIPAL — USO DE TOOLS\n\nSempre que o usuário informar um gasto:\n\nVocê DEVE obrigatoriamente chamar a tool [Persist financial informations] ANTES de responder ao usuário.\n\nNunca responda antes da tool.\n\nNunca pergunte se deve registrar.\n\nDetectou valor + descrição → registre.\n\nSomente após a tool retornar, você envia a mensagem curta ao usuário.\n\nNunca retorne json, códigos ou ids como resposta para o usuário. Sempre utilize os templates.\n\n📥 REGISTRO DE DESPESAS\n\nQuando o usuário informar um gasto:\n\n1️⃣ Extrair:\n\ndescrição\n\nvalor\n\ncategoria\n\ndata (ou {{ DateTime.now() }})\n\nUUID\n\n2️⃣ Chamar a tool de inserção.\n3️⃣ Após retorno, sempre use o template para responder:\nGasto registrado:\n[descrição] — R$ [valor],\ncategoria [categoria],\ndata [data].\n\n\nNada além disso.\n\n📊 ATUALIZAÇÃO DE REGISTROS\n1️⃣ Identificar se o usuário já informou o item\n\nSe não informou, liste os registros recentes numerados:\n\n1. [descrição] — R$ [valor], categoria [categoria], data: [dd-mm-aaaa]\n2. ...\n\n\nE aguarde o usuário escolher o item.\n\n2️⃣ Após o usuário escolher o item:\n\nIdentifique os campos que ele deseja alterar\n\nInterprete corretamente os novos valores\n\n3️⃣ Confirmação única (sem duplicação)\n\nAntes de atualizar, diga APENAS:\n\nConfirma atualizar o item X para:\ndescrição: [...]\nvalor: R$ [...]\ncategoria: [...]\ndata: [...]\nPor favor, responda SIM para confirmar.\n\n\nNenhuma outra frase de confirmação deve ser usada.\n\n4️⃣ Após o SIM:\n\nConsulte a tool de consulta para obter o ID\n\nExecute a tool de update\n\nDepois responda:\n\nItem atualizado:\n[descrição] — R$ [valor], categoria [categoria], data [data].\n\n🗑 REMOÇÃO DE REGISTROS\n1️⃣ Se o usuário não informou o item\n\nListe os registros recentes numerados:\n\n1. [descrição] — R$ [valor], categoria [categoria], data: [dd-mm-aaaa]\n2. ...\n\n2️⃣ Após o usuário indicar o item:\n\nConsulte a tool de consulta para identificar o ID\n\nNão remova ainda\n\n3️⃣ Confirmação única (sem duplicação)\nConfirma a exclusão do item X:\ndescrição: [...]\nvalor: R$ [...]\ncategoria: [...]\ndata: [...]\nPor favor, responda SIM para confirmar.\n\n\nApenas isso.\n\n4️⃣ Após o SIM:\n\nEnviar o ID para a tool de deleção\n\nResponder:\n\nItem excluído:\n[descrição] — R$ [valor], categoria [categoria], data [data].\n\n📊 RELATÓRIOS (CONSULTAS)\n\nAgora 100% corrigido para NÃO duplicar categorias nem repetir o bloco inteiro.\n\nQuando o usuário pedir relatórios:\n\nUse apenas a tool de consulta.\n\nNunca repita categorias.\n\nNunca repita itens.\n\nNunca gere o relatório duas vezes.\n\nNunca adicione texto extra.\n\n✔️ Formato obrigatório (sem repetição):\n[CATEGORIA]\n  1. [descrição] — R$ [valor], data: [dd-mm-aaaa]\n  2. [...]\n\nResumo por categoria:\n[CATEGORIA A]: R$ total\n[CATEGORIA B]: R$ total\nTotal: R$ [soma geral]\n\n\nApenas UMA lista.\nApenas UM resumo.\nNunca gere o relatório duas vezes.\n\n📦 SISTEMA DE CATEGORIZAÇÃO INTELIGENTE\n\n(Mantido sem alterações — já estava perfeito)\n\nInclui todas as regras de Automóvel, Alimentação, Casa & Utilidades, Educação, Compras, Saúde, Lazer, Trabalho, Contas, Doações e ambiguidades.\n\n🗣 Tom de Voz\n\nSempre curto, direto, amigável e financeiro.\nÀs vezes, use o nome:\n\n{{ $('Normalize fields').item.json.pushName }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1600,
+        320
+      ],
+      "id": "1b1e48bd-f284-4b3c-8d2a-f27e36f8de9a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1376,
+        496
+      ],
+      "id": "fbb529cf-4c9f-41d2-9963-df7e59c2a7cc",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "p5mtpWf1L6RfqLJ9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "zapi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1120,
+        368
+      ],
+      "id": "49fa6719-42a1-4acb-ad68-6ddf64ea0f85",
+      "name": "Webhook",
+      "webhookId": "d943ee86-501f-4043-b9d6-4656445e4188"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0635de0-2905-4df6-a87a-a85566d8365d",
+              "name": "chatId",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "2969b8fd-aaf1-45b8-87f1-4fb9d2db4912",
+              "name": "pushName",
+              "value": "={{ $json.body.senderName }}",
+              "type": "string"
+            },
+            {
+              "id": "9dd3aac8-d657-4fe2-b73d-2ab815aee4cb",
+              "name": "message",
+              "value": "={{ $json.body.text.message }}",
+              "type": "string"
+            },
+            {
+              "id": "65d87a8b-f930-47ad-9035-adc578a75de5",
+              "name": "fromMe",
+              "value": "={{ $json.body.fromMe }}",
+              "type": "string"
+            },
+            {
+              "id": "60f9b9da-fced-4bf4-97d3-ffb57fbb71f8",
+              "name": "audio",
+              "value": "={{ $json.body.audio.audioUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "7e77e489-6cae-47c2-bee3-9f5dbcd0a1e4",
+              "name": "messageId",
+              "value": "={{ $json.body.messageId }}",
+              "type": "string"
+            },
+            {
+              "id": "4eea268e-7246-4b0d-8402-896715fde4a0",
+              "name": "",
+              "value": "={{ $json.body.chatLid }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -816,
+        368
+      ],
+      "id": "f6c909fb-e740-46ac-ac6d-b9fef8f5fba1",
+      "name": "Normalize fields"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        432,
+        0
+      ],
+      "id": "91ee8e26-ea90-40bf-8fd7-9aec4e168bed",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "p5mtpWf1L6RfqLJ9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "26a37ffc-e4da-4e40-96e3-369163ec2569",
+              "leftValue": "={{ $json.audio }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c3c5b1ee-2c48-4943-a9c6-62d014d26f3e",
+              "leftValue": "={{ $('Webhook').item.json.body.audio.mimeType }}",
+              "rightValue": "audio/ogg; codecs=opus",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        368
+      ],
+      "id": "c758848a-4f35-40ab-9ab4-af32d01e1800",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "92911159-a7c8-49a0-a3ba-d223ddd773a3",
+              "name": "audioUrl",
+              "value": "={{ $json.audio }}",
+              "type": "string"
+            },
+            {
+              "id": "c9f59776-0166-44d6-9418-92e8e688bb09",
+              "name": "chatId",
+              "value": "={{ $('Normalize fields').item.json.chatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2aee955f-cf93-4185-92a8-efec2760d460",
+      "name": "Get audio url"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9bdf74b3-0381-4e71-974e-acc2714ebaea",
+              "name": "userMessage",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        400
+      ],
+      "id": "b0faf1c5-ad99-4744-8697-e0beb8e203c4",
+      "name": "Set Text Message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ae6d4ea1-f186-490e-ad70-114f10534526",
+              "name": "userMessage",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "b79ea50a-b18e-4dd4-9150-912d059337cd",
+              "name": "chatId",
+              "value": "={{ $('Normalize fields').item.json.chatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        0
+      ],
+      "id": "f2a38d19-53e1-4539-b65e-6821f883abb8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.audioUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d445e857-48e4-4486-8dd0-2f7e8bfc34eb",
+      "name": "Download Audio"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Normalize fields').item.json.chatId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1536,
+        624
+      ],
+      "id": "e77074b8-e39d-43da-907f-78fbb8850afc",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "478c8eae-2885-40bd-a26a-11283fb63a3c",
+              "name": "userMessage",
+              "value": "={{ $json.userMessage }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        176
+      ],
+      "id": "57ba1355-7f2f-4e83-9b73-ce941b8cc474",
+      "name": "Normalize Message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3EAC63B5C99F10D590C4D2F0F8AD607A/token/47BF12CFF233011F3871A81C/send-text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "client-token",
+              "value": "Fdf8c14c39e60421bb6a6e440f9e5a3e3S"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Normalize fields').item.json.chatId }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('AI Agent').item.json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2560,
+        304
+      ],
+      "id": "6e21544e-6bf0-42d1-818b-47d4acbe271d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3EAC63B5C99F10D590C4D2F0F8AD607A/token/47BF12CFF233011F3871A81C/read-message",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "client-token",
+              "value": "Fdf8c14c39e60421bb6a6e440f9e5a3e3S"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Normalize fields').item.json.chatId }}"
+            },
+            {
+              "name": "messageId",
+              "value": "={{ $('Normalize fields').item.json.messageId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2224,
+        304
+      ],
+      "id": "6e9b80e3-facb-47b5-aba4-8867bec2c05e",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "notes",
+        "fields": "userMessage",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.2,
+      "position": [
+        1872,
+        512
+      ],
+      "id": "906e7c41-97a3-4289-bfdd-69e848a170e2",
+      "name": "Insert documents in MongoDB",
+      "credentials": {
+        "mongoDb": {
+          "id": "iS3uxSIW8nShGvjz",
+          "name": "MongoDB account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get audio url",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Text Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get audio url": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Text Message": {
+      "main": [
+        [
+          {
+            "node": "Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert documents in MongoDB": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dddd42e9-ddf7-4eb5-a995-cbb96fcd2a54",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ff46fa3e80ae14373debd4f3aa03893573e92bff5cf4f58c356d89fb10a1b9c1"
+  },
+  "id": "S2X1gGecB4hunk9p",
+  "tags": []
+}

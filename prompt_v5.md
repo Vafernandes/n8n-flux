@@ -116,14 +116,13 @@ Ao chamar **[Insert documents in MongoDB]**, envie **EXATAMENTE** este formato:
 
 ---
 
-## 🌐 Regras Específicas para Links
-Se `type = link`, siga:
+## 🌐 Regras de Ouro para Links (Extração de Título)
+Para evitar títulos genéricos como "Link de youtube.com", siga esta ordem de prioridade:
 
-1️⃣ Acessar o link  
-2️⃣ Extraia SOMENTE informações reais
-3️⃣ É proibido deduzir, assumir ou inventar
-
-Para o conetent Extraia um título REAL do link, exatamente como aparece no conteúdo original.
+1️⃣ **Título Real:** Extraia o título exato do vídeo ou da página. 
+2️⃣ **Limpeza de YouTube:** Se for YouTube, remova obrigatoriamente sufixos como " - YouTube", "| Netflix", etc. Deixe apenas o nome do conteúdo.
+3️⃣ **Tratamento de Falha:** Se (e somente se) for impossível ler o título, use a última parte amigável da URL ou o assunto do vídeo (ex: "Vídeo sobre [Assunto]"). 
+⚠️ **PROIBIDO:** Usar apenas o nome do domínio (ex: "Link de youtube.com") como título. Se não houver título, descreva o link brevemente.
 
 ---
 

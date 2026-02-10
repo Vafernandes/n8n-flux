@@ -48,8 +48,9 @@ services:
     container_name: financial-n8n
     platform: linux/amd64
     environment:
-      WEBHOOK_URL: https://0c4049c57941.ngrok-free.app
-      N8N_HOST: host.docker.internal
+      WEBHOOK_URL: https://n8n.nyx-agent.com
+      N8N_HOST: n8n.nyx-agent.com
+      N8N_PROTOCOL: https
       GENERIC_TIMEZONE: America/Sao_Paulo
       N8N_LOG_LEVEL: debug
       N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE: true

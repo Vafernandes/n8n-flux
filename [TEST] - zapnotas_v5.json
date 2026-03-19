@@ -1,0 +1,1015 @@
+{
+  "name": "[TEST] - agente de custo",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Normalize Message').item.json.userMessage }}",
+        "options": {
+          "systemMessage": "=## 🎯 Identidade do Agente\nVocê é um **Assistente Inteligente de Registro e Consulta de Notas**.\n\nSuas funções são exclusivamente:\n- Identificar intenção\n- Classificar corretamente\n- Categorizar\n- Registrar notas\n- Consultar notas\n- Excluir notas\n\nVocê NÃO conversa livremente.  \nVocê NÃO opina.  \nVocê NÃO explica decisões.\n\n---\n\n## 🛑 Regras Absolutas\nVocê deve SEMPRE cumprir:\n\n- Nunca invente informações\n- Nunca responda fora do contexto de notas\n- Nunca gere respostas longas\n- Nunca responda antes de executar uma tool\n- Nunca retorne JSON, IDs ou códigos ao usuário\n- Sempre gere UUID v4 para **novas notas**\n- Nunca gere novo UUID em atualizações\n- Quando não houver data explícita, use `{{ DateTime.now() }}`\n- Sempre analise a mensagem antes de agir\n- Só responda ao usuário **após o resultado da tool**\n\n---\n\n## 🧭 Contexto do Sistema\n- Data atual: `{{ DateTime.now() }}`\n- Nome do usuário: `{{ $('Normalize fields').item.json.pushName }}`\n- Identificador do usuário: `{{ $('Normalize fields').item.json.chatId }}`\n- Canal: `whatsapp`\n\n---\n\n## ⚙️ Fluxo de Decisão\n\n### Se for **QUALQUER MENSAGEM**\nVocê DEVE executar: \n👉 **[Find any user message]**\n\nSE nenhum resultado for encontrado ENTÃO você DEVE enviar a mensagem de boas-vindas:\n\"Bem vindo `{{ $json.body.senderName }}`. Eu sou o Nyx, seu assistente de anotações.\nBasta me enviar uma mensagem, um áudio, uma imagem ou um link que eu irei identificá-lo e categorizá-lo para você 😊\"\n\n### 📝 Se for **REGISTRO**\nVocê DEVE executar:\n👉 **[Insert documents in MongoDB]**\n\n---\n\n### 🔎 Se for **CONSULTA**\nVocê DEVE executar:\n👉 **[Find notes per user]**\n\nIsso inclui:\n- Listar itens  \n- Procurar notas  \n- Buscar por texto  \n- Consultar lembretes  \n- Ver links salvos  \n- Histórico  \n- Qualquer dado armazenado  \n\nNunca invente resultados.\n**APENAS** realize a consulta quando o intuito for consultar, caso o intuito do usuário não seja uma consulta, apenas registre a informação\nSe nada for encontrado:\n> “Não encontrei nada relacionado a isso ainda 😊”\n\n---\n\n## 📦 Formato Obrigatório da Tool — Insert\nAo chamar **[Insert documents in MongoDB]**, envie **EXATAMENTE** este formato:\n\n```json\n{\n  \"id\": \"<uuid>\",\n\n  \"userId\": \"{{ $('Normalize fields').item.json.chatId }}\",\n\n  \"type\": \"text | reminder | link | image | audio\",\n\n  \"content\": {\n    \"text\": \"string | null\",\n    \"caption\": \"string | null\"\n  },\n\n  \"metadata\": {\n    \"remindAt\": \"ISO_DATE | null\",\n    \"url\": \"string | null\",\n    \"imageUrl\": \"string | null\",\n    \"audioUrl\": \"string | null\",\n    \"duration\": \"number | null\",\n    \"confidence\": \"number | null\",\n    \"tags\": []\n  },\n\n  \"status\": \"active\",\n\n  \"source\": {\n    \"channel\": \"whatsapp\",\n    \"messageId\": \"{{ $('Normalize fields').item.json.messageId }}\"\n  },\n\n  \"createdAt\": \"{{ DateTime.now() }}\",\n  \"updatedAt\": \"{{ DateTime.now() }}\"\n}\n```\n\n### ⚠️ Regras do JSON\n- `id` obrigatório (UUID v4)\n- `type` obrigatório e válido\n- `tags` sempre `array` (máx 3 itens)\n- Campos não utilizados devem ser `null`\n- Nunca adicionar campos extras\n- Nunca alterar nomes\n- Nunca alterar estrutura\n\n---\n\n## 🌐 Regras de Ouro para Links (Extração de Título)\nPara evitar títulos genéricos como \"Link de youtube.com\", siga esta ordem de prioridade:\n\n1️⃣ **Título Real:** Extraia o título exato do vídeo ou da página. \n2️⃣ **Limpeza de YouTube:** Se for YouTube, remova obrigatoriamente sufixos como \" - YouTube\", \"| Netflix\", etc. Deixe apenas o nome do conteúdo.\n3️⃣ **Tratamento de Falha:** Se (e somente se) for impossível ler o título, use a última parte amigável da URL ou o assunto do vídeo (ex: \"Vídeo sobre [Assunto]\"). \n⚠️ **PROIBIDO:** Usar apenas o nome do domínio (ex: \"Link de youtube.com\") como título. Se não houver título, descreva o link brevemente.\n\n---\n\n## 🧠 Classificação da Nota\nAnalise semanticamente a mensagem e classifique EXATAMENTE um dos tipos:\n\n- Links\n- Lembretes\n- Anotações\n- Listas  \n  > Se identificar múltiplos itens sequenciais, **não classifique como anotação**\n- Financeiro\n- Arquivos\n- Contatos\n- Outros\n\n---\n\n## 🏷️ Tags\n- Sempre array\n- Até **3 tags**\n- Curtas e objetivas\n- Baseadas em contexto real  \n  Exemplo:  \n  > Link de filme de ação → `[\"filme\", \"ação\", \"entretenimento\"]`\n\n---\n\n## 🗣️ Resposta ao Usuário\n\n### Após Inserção\nDepois de executar com sucesso:\n> “Nota registrada com sucesso 😊”\n\n---\n\n### Em Listagens\nResponda de forma amigável, clara e curta, como:\n\nAqui está o que encontrei para você 👇  \n• 🎯 Título  \n• 🏷️ Tags  \n• 🔗 Link (se tiver)  \n• 📝 Resumo curto  \n\nSe houver vários:\n```\nEncontrei X registros 👍\n\n1️⃣ Título\n— resumo curto\n🔗 link (se tiver)\n\n2️⃣ Título\n— resumo curto\n🔗 link (se tiver)\n```\n\n---\n\n## 🚨 Falhas\nSe não conseguir acessar conteúdo:\n> “Não consegui acessar isso agora, quer tentar de outra forma? 👍”\n\nSe precisar de mais contexto:\n> “Pode me dar mais detalhes? 😊”\n\n---\n\n## 🚫 É proibido\n- Perguntar se deve registrar\n- Conversar livremente\n- Explicar decisões\n- Inventar informações\n- Responder antes de executar ferramenta\n- Mostrar JSON ao usuário\n\n---\n\n## 🏁 Encerramento\nVocê não é um chatbot comum.  \nVocê é um agente determinístico de registro e consulta de notas.  \nQualquer comportamento fora destas regras é **incorreto**.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1944,
+        640
+      ],
+      "id": "77a12347-c88e-4168-ac26-09c3e75bda78",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1824,
+        864
+      ],
+      "id": "744f44b2-06b1-457c-b6bd-76d4057cbb5c",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Mv3WDu7r6I1PI4Wx",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "zapi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        640
+      ],
+      "id": "effb29b5-1581-4e73-8d05-4664f1adeb44",
+      "name": "Webhook",
+      "webhookId": "d943ee86-501f-4043-b9d6-4656445e4188"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0635de0-2905-4df6-a87a-a85566d8365d",
+              "name": "chatId",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "2969b8fd-aaf1-45b8-87f1-4fb9d2db4912",
+              "name": "pushName",
+              "value": "={{ $json.body.senderName }}",
+              "type": "string"
+            },
+            {
+              "id": "9dd3aac8-d657-4fe2-b73d-2ab815aee4cb",
+              "name": "message",
+              "value": "={{ $json.body.text.message }}",
+              "type": "string"
+            },
+            {
+              "id": "65d87a8b-f930-47ad-9035-adc578a75de5",
+              "name": "fromMe",
+              "value": "={{ $json.body.fromMe }}",
+              "type": "string"
+            },
+            {
+              "id": "60f9b9da-fced-4bf4-97d3-ffb57fbb71f8",
+              "name": "audio",
+              "value": "={{ $json.body.audio.audioUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "7e77e489-6cae-47c2-bee3-9f5dbcd0a1e4",
+              "name": "messageId",
+              "value": "={{ $json.body.messageId }}",
+              "type": "string"
+            },
+            {
+              "id": "4eea268e-7246-4b0d-8402-896715fde4a0",
+              "name": "",
+              "value": "={{ $json.body.chatLid }}",
+              "type": "string"
+            },
+            {
+              "id": "9cf99b14-3749-4e6e-be4a-df6dbeb8e350",
+              "name": "document",
+              "value": "={{ $json.body.document.documentUrl }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        256,
+        640
+      ],
+      "id": "888daec3-49d0-4c04-9323-6768bb499906",
+      "name": "Normalize fields"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        352
+      ],
+      "id": "396cc65c-e1ed-4297-9afb-84c76a4dae0f",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "Mv3WDu7r6I1PI4Wx",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "92911159-a7c8-49a0-a3ba-d223ddd773a3",
+              "name": "audioUrl",
+              "value": "={{ $json.audio }}",
+              "type": "string"
+            },
+            {
+              "id": "c9f59776-0166-44d6-9418-92e8e688bb09",
+              "name": "chatId",
+              "value": "={{ $('Normalize fields').item.json.chatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        352
+      ],
+      "id": "4e91498b-1783-4b04-83b3-8bfee211fb7e",
+      "name": "Get audio url"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9bdf74b3-0381-4e71-974e-acc2714ebaea",
+              "name": "userMessage",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        736
+      ],
+      "id": "432527de-7c39-4594-958b-88856400a6f0",
+      "name": "Set Text Message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ae6d4ea1-f186-490e-ad70-114f10534526",
+              "name": "userMessage",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "b79ea50a-b18e-4dd4-9150-912d059337cd",
+              "name": "chatId",
+              "value": "={{ $('Normalize fields').item.json.chatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        352
+      ],
+      "id": "dc6dce7f-0846-43b0-ada4-dff675d66b7b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.audioUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        928,
+        352
+      ],
+      "id": "a948d7a5-b645-423e-8ee0-812d23bdfdf5",
+      "name": "Download Audio"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Normalize fields').item.json.chatId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        1360
+      ],
+      "id": "009fd361-f1e1-4186-afd8-c9db86fed66c",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "478c8eae-2885-40bd-a26a-11283fb63a3c",
+              "name": "userMessage",
+              "value": "={{ $json.userMessage }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        640
+      ],
+      "id": "2a1b975b-59f3-4682-8c6f-afadb325ef43",
+      "name": "Normalize Message"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "notes",
+        "fields": "=userMessage, id, userId, type, content, metadata, status, source, createdAt, updatedAt, toolCallId",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.2,
+      "position": [
+        1952,
+        864
+      ],
+      "id": "b265beae-71a4-4ea3-af8e-450cb21195f5",
+      "name": "Insert documents in MongoDB",
+      "credentials": {
+        "mongoDb": {
+          "id": "ajH88z7Hl8S3grgz",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook').item.json.body.audio.mimeType }}",
+                    "rightValue": "audio/ogg; codecs=opus",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "0247ad47-833c-4fbc-9b78-97774447877b"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "df05e7e9-1b0f-4025-a307-e8802ce6f142",
+                    "leftValue": "={{ $('Webhook').item.json.body.image.mimeType }}",
+                    "rightValue": "image/jpeg",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f99ec075-67f9-4e73-8fe7-0bb76aa440b1",
+                    "leftValue": "={{ $('Webhook').item.json.body.text.message }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5fb68bd7-e15a-48fc-9815-96374b680ed9",
+                    "leftValue": "={{ $('Webhook').item.json.body.document.mimeType }}",
+                    "rightValue": "application/pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        480,
+        608
+      ],
+      "id": "1cb44151-de64-4f6c-bcf3-d56e5cd03b3f",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        544
+      ],
+      "id": "bafebeb0-8ad0-4cf9-abf8-463041f64b3f",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "Mv3WDu7r6I1PI4Wx",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ae6d4ea1-f186-490e-ad70-114f10534526",
+              "name": "userMessage",
+              "value": "={{ $json['0'].content[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "b79ea50a-b18e-4dd4-9150-912d059337cd",
+              "name": "chatId",
+              "value": "={{ $('Normalize fields').item.json.chatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        544
+      ],
+      "id": "34d2e48f-f7e4-4d4b-b1d6-7ab1c98f6e65",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Webhook').item.json.body.image.imageUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        928,
+        544
+      ],
+      "id": "dff02500-35e3-4afa-baa6-a6b645e95146",
+      "name": "Download image"
+    },
+    {
+      "parameters": {
+        "collection": "=notes",
+        "options": {},
+        "query": "={\"userId\": \"{{ $('Normalize fields').item.json.chatId }}\" }"
+      },
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.2,
+      "position": [
+        2080,
+        864
+      ],
+      "id": "e7f64606-55a7-496f-9de3-ab4eebfe53a8",
+      "name": "Find notes per user",
+      "credentials": {
+        "mongoDb": {
+          "id": "ajH88z7Hl8S3grgz",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `https://www.youtube.com/oembed?url=<video_url>&format=json`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        32,
+        1568
+      ],
+      "id": "8a2d08bf-0efa-436b-ba42-8ab43c72b9d0",
+      "name": "Get YoutTube info"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        32,
+        1152
+      ],
+      "id": "3a5022ac-eab5-4452-8559-b1adedf09573",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3EAC63B5C99F10D590C4D2F0F8AD607A/token/47BF12CFF233011F3871A81C/read-message",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "client-token",
+              "value": "Fdf8c14c39e60421bb6a6e440f9e5a3e3S"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Normalize fields').item.json.chatId }}"
+            },
+            {
+              "name": "messageId",
+              "value": "={{ $('Normalize fields').item.json.messageId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2416,
+        640
+      ],
+      "id": "4cb6477d-1f68-43df-91d3-22fce8a6d047",
+      "name": "Read message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3EAC63B5C99F10D590C4D2F0F8AD607A/token/47BF12CFF233011F3871A81C/send-text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "client-token",
+              "value": "Fdf8c14c39e60421bb6a6e440f9e5a3e3S"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Normalize fields').item.json.chatId }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('AI Agent').item.json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2640,
+        640
+      ],
+      "id": "66f2bad6-4ce0-48ff-8483-431825e1c6b9",
+      "name": "Send message"
+    },
+    {
+      "parameters": {
+        "collection": "notes",
+        "options": {
+          "limit": 1
+        },
+        "query": "={\"userId\": \"{{ $('Normalize fields').item.json.chatId }}\" }"
+      },
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.2,
+      "position": [
+        2208,
+        864
+      ],
+      "id": "cfc94a3e-2be0-4157-94b0-4ffbc6980c8b",
+      "name": "Find any user message",
+      "credentials": {
+        "mongoDb": {
+          "id": "ajH88z7Hl8S3grgz",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Webhook').item.json.body.document.documentUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        928,
+        928
+      ],
+      "id": "f6202a7b-9e0d-4272-8039-bb7c2a5015d9",
+      "name": "Download PDF"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1152,
+        928
+      ],
+      "id": "fadc9eda-d4d5-437f-9350-31a5f3a894e3",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ae6d4ea1-f186-490e-ad70-114f10534526",
+              "name": "userMessage",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "b79ea50a-b18e-4dd4-9150-912d059337cd",
+              "name": "chatId",
+              "value": "={{ $('Normalize fields').item.json.chatId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        928
+      ],
+      "id": "adb7024e-59f8-4186-9ca1-cf7db8bc0c9d",
+      "name": "Get PDF content"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.nyx-agent.com",
+            "x-real-ip": "137.131.209.174",
+            "x-forwarded-for": "137.131.209.174",
+            "x-forwarded-proto": "https",
+            "connection": "close",
+            "content-length": "1055",
+            "user-agent": "Mozilla/5.0 (iPod touch; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/604.5.6 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+            "z-api-token": "47BF12CFF233011F3871A81C",
+            "server": "Z-API",
+            "origin": "https://api.z-api.io",
+            "content-type": "application/json; charset=utf-8",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "isStatusReply": false,
+            "chatLid": "264548678402187@lid",
+            "connectedPhone": "558594236743",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": false,
+            "isNewsletter": false,
+            "instanceId": "3EAC63B5C99F10D590C4D2F0F8AD607A",
+            "messageId": "ACEE0930F2970014E4DAA09E3EBD6BA1",
+            "phone": "558899956689",
+            "fromMe": false,
+            "momment": 1773936017000,
+            "status": "RECEIVED",
+            "chatName": "Vinícius",
+            "senderPhoto": null,
+            "senderName": "Vini",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/591630169_879510994635520_3237651746088119262_n.jpg?ccb=11-4&oh=01_Q5Aa4AFYpqFFUbAotAc7Ac1OwkT-WfRGUQbUZaA3Raq5RgiHVg&oe=69C936F2&_nc_sid=5e03e0&_nc_cat=101",
+            "broadcast": false,
+            "participantLid": null,
+            "messageExpirationSeconds": 0,
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "document": {
+              "caption": null,
+              "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3EAC63B5C99F10D590C4D2F0F8AD607A/ACEE0930F2970014E4DAA09E3EBD6BA1/CAsnY7RqIwSPwjMp1YNeBg==.pdf",
+              "mimeType": "application/pdf",
+              "title": "90eQX297ygKJrY8LDpGW.pdf",
+              "pageCount": 2,
+              "fileName": "90eQX297ygKJrY8LDpGW.pdf"
+            }
+          },
+          "webhookUrl": "https://n8n.nyx-agent.com/webhook/zapi",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Read message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get audio url": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Text Message": {
+      "main": [
+        [
+          {
+            "node": "Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert documents in MongoDB": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get audio url",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Text Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download image": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find notes per user": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read message": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find any user message": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download PDF": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Get PDF content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get PDF content": {
+      "main": [
+        [
+          {
+            "node": "Normalize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "70664705-66ed-4453-8952-da194b6ce0fa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "00c4df02d891eab19f5552c5ab8a271524316213ef9cb252955e1e31fba0084b"
+  },
+  "id": "TRDp95eArOuLSo6I7cDiu",
+  "tags": []
+}
